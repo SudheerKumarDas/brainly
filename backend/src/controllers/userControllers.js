@@ -7,13 +7,13 @@ export const userRegister = async (req, res) => {
   try {
     const { username, email, password } = req.body;
     if (!username || !email || !password) {
-      res.status(400).json({
+      return res.status(400).json({
         message: "Invalid credentials",
       });
     }
     const existingUser = await User.findOne({email});
     if(existingUser){
-        res.status(409).json({
+        return res.status(409).json({
             message:"User with this email already exists"
         })
     }
@@ -28,7 +28,7 @@ export const userRegister = async (req, res) => {
     })
   } catch (error) {
     console.error(`Error in Registering user ${error}`);
-    res.status(500).json({
+    return res.status(500).json({
         message:"Internal Server Error"
     })
   }
@@ -39,19 +39,19 @@ export const userLogin = async (req,res) => {
     try {
         const {email, password} = req.body;
         if(!email || !password){
-            res.status(400).json({
+            return res.status(400).json({
                 message:"provide valid credentials"
             })
         }
         const user = await User.findOne({email});
         if(!user){
-            res.status(404).json({
+            return res.status(404).json({
                 message:"provide valid credentials"
             })
         }
         const isPasswordMatach = await bcrypt.compare(password,user.password);
         if(!isPasswordMatach){
-            res.status(403).json({
+            return res.status(403).json({
                 message:"provide valid credentials"
             })
         }
@@ -75,7 +75,7 @@ export const userLogin = async (req,res) => {
         })
     } catch (error) {
         console.error(`Error user logging in ${error}`);
-        res.status(500).json({
+        return res.status(500).json({
             message:"Internal Server Error"
         })
     }
@@ -86,7 +86,7 @@ export const userDetails = async (req,res) => {
         const token = req.cookies.token;
         console.log(token);
         if(!token){
-            res.status(401).json({
+            return res.status(401).json({
                 message:"provide token"
             })
         }
@@ -99,7 +99,27 @@ export const userDetails = async (req,res) => {
         })
     } catch (error) {
         console.error(`Error in getting user ${error}`);
-        res.status(500).json({
+        return res.status(500).json({
+            message:"Internal Server Error"
+        })
+    }
+}
+
+export const userLogout = async (req,res) => {
+    try {
+        const token = req.cookies.token;
+        if(!token){
+            return res.status(401).json({
+                message:"provide token"
+            })
+        }
+        res.clearCookie("token");
+        return res.status(201).json({
+            message:"User logged out successfully"
+        })
+    } catch (error) {
+        console.error(`Error in user logging out ${error}`);
+        return res.status(500).json({
             message:"Internal Server Error"
         })
     }
