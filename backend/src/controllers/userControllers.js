@@ -80,3 +80,27 @@ export const userLogin = async (req,res) => {
         })
     }
 }
+
+export const userDetails = async (req,res) => {
+    try {
+        const token = req.cookies.token;
+        console.log(token);
+        if(!token){
+            res.status(401).json({
+                message:"provide token"
+            })
+        }
+        const decoded = jwt.verify(token,process.env.JWT_SECRET);
+        const userId = decoded.userId;
+        const user = await User.findById(userId);
+        res.status(201).json({
+            message:"Getting user info successfully",
+            data:user
+        })
+    } catch (error) {
+        console.error(`Error in getting user ${error}`);
+        res.status(500).json({
+            message:"Internal Server Error"
+        })
+    }
+}
