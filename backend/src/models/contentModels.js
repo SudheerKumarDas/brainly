@@ -1,25 +1,38 @@
 import mongoose from "mongoose";
-import User from "./userModels";
 
 const contentSchema = new mongoose.Schema({
     link:{
         type:String,
     },
-    type:{
+    contentType:{
         type:String,
+        enum:[
+            "note",
+            "audio",
+            "video",
+            "document",
+            "social"
+        ]
     },
     title:{
-        type:String
+        type:String,
+        required:true,
+        trim:true
     },
     description:{
-        type:String
+        type:String,
+        trim:true
     },
     tags:{
-        type:[String]
+        type:[mongoose.SchemaTypes.ObjectId],
+        ref:"Tags",
+        lowercase:true,
+        trim:true
     },
     userId:{
         type:mongoose.SchemaTypes.ObjectId,
-        ref:User
+        ref:"User",
+        required:true
     }
 },{
     timestamps:true
