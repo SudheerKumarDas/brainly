@@ -83,15 +83,7 @@ export const userLogin = async (req,res) => {
 
 export const userDetails = async (req,res) => {
     try {
-        const token = req.cookies.token;
-        console.log(token);
-        if(!token){
-            return res.status(401).json({
-                message:"provide token"
-            })
-        }
-        const decoded = jwt.verify(token,process.env.JWT_SECRET);
-        const userId = decoded.userId;
+        const userId = req.userId;
         const user = await User.findById(userId);
         res.status(201).json({
             message:"Getting user info successfully",
@@ -107,12 +99,7 @@ export const userDetails = async (req,res) => {
 
 export const userLogout = async (req,res) => {
     try {
-        const token = req.cookies.token;
-        if(!token){
-            return res.status(401).json({
-                message:"provide token"
-            })
-        }
+        const token = req.userId;
         res.clearCookie("token");
         return res.status(201).json({
             message:"User logged out successfully"
