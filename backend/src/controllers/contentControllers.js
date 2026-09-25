@@ -108,3 +108,30 @@ export const deleteAContent = async(req,res) => {
         })
     }
 }
+
+export const updateContent = async(req,res) => {
+    try {
+        const userId = req.userId;
+        const contentId = req.params.id;
+        if(!contentId){
+            return res.status(400).json({
+                message:"invalid content"
+            })
+        }
+        const updatedContent = await Content.findByIdAndUpdate(contentId,{$set:req.body},{returnDocument:"after"});
+        if(!updatedContent){
+            return res.status(404).json({
+                message:"invalid content"
+            })
+        }
+        res.status(200).json({
+            message:"content updated successfully",
+            data:updateContent
+        })
+    } catch (error) {
+        console.error("Error in updating a content ",error);
+        res.status(500).json({
+            message:"Internal server error"
+        })
+    }
+}
