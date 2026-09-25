@@ -81,3 +81,30 @@ export const getAContent = async(req,res) => {
         })
     }
 }
+
+export const deleteAContent = async(req,res) => {
+    try {
+        const userId = req.userId;
+        const contentId = req.params.id;
+        if(!contentId){
+            return res.status(400).json({
+                message:"invalid content"
+            })
+        }
+        const content = await Content.findByIdAndDelete(contentId);
+        if(!content){
+            return res.status(404).json({
+                message:"Content not available"
+            })
+        }
+        res.status(200).json({
+            message:"content deleted successfully",
+            data:content
+        })
+    } catch (error) {
+        console.error("Error in deleting a content ",error);
+        res.status(500).json({
+            message:"Internal server error"
+        })
+    }
+}
