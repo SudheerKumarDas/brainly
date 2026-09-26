@@ -165,3 +165,93 @@ export const toogleFavorite = async(req,res) => {
         })
     }
 }
+
+export const toogleArchived = async(req,res) => {
+    try {
+        const userId = req.userId;
+        const memoryId = req.params.id;
+        const memory = await Memory.findOne({_id:memoryId,userId:userId,isDeleted:false});
+        if(!memory){
+            return res.status(404).json({
+                message:"Memory not available"
+            })
+        }
+        memory.isArchived = !memory.isArchived;
+        await memory.save();
+
+        res.status(200).json({
+            message:memory.isArchived  ? "memory is archived" : "memory is unarchived",
+            memory:memory
+        })
+    } catch (error) {
+        console.error("Error in toggling memory archived :",error);
+        res.status()
+    }
+}
+
+export const restoreMemory = async(req,res) => {
+    try {
+        const userId = req.userId;
+        const memoryId = req.params.id;
+        const memory = await Memory.findOne({userId:userId,_id:memoryId,isDeleted:true});
+        if(!memory){
+            return res.status(404).json({
+                message:"memory not found"
+            })
+        }
+        memory.isDeleted = false;
+        await memory.save();
+
+        res.status(200).josn({
+            message:"Memory is restored successfully",
+            memory:memory
+        })
+    } catch (error) {
+        console.error("Error in restoring memory");
+        res.status(500).json({
+            message:"Internal server error"
+        })
+    }
+}
+
+export const deleteMemoryPermanently = async(req,res) => {
+    try {
+        const userId = req.userId;
+        const memoryId = req.params.id;
+        const memory = await Memory.findOneAndDelete({_id:memoryId,userId:userId,isDeleted:true});
+        if(!memory){
+            return res.status(404).json({
+                message:"Memory not found"
+            })
+        }
+        res.status(200).json({
+            message:"Memory deleted permanently"
+        })
+    } catch (error) {
+        console.error("Error in deleting memory permanently :",error);
+        res.status(500).json({
+            message:"Internal server error"
+        })
+    }
+}
+
+export const getDeletedMemories = async(req,res) => {
+    try {
+        const userId = req.userId;
+        const deletedMemories = await Memory.find({userId:userId,isDeleted:true});
+        if(!deletedMemories){
+            return res.status(404).json({
+                message:"Memory not found"
+            })
+        }
+        res.status(200).json({
+            message:"Deleted memories in trash",
+            deletedMemories:deletedMemories
+        })
+    } catch (error) {
+        console.error("Error in deleting memory permanently :",error);
+        res.status(500).json({
+            message:"Internal server error"
+        })
+    }
+}
