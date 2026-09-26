@@ -255,3 +255,100 @@ export const getDeletedMemories = async(req,res) => {
         })
     }
 }
+
+export const queryMemories = async(req,res) => {
+    try {
+        const userId = req.userId;
+        const {q,tag,source,favorite,archived,sort="newest",page=1,limit=10} = req.query;
+        const filter = {
+            userId:userId,
+            isDeleted:false
+        }
+        // for searching the memories like querying for favorite or archived memories
+        if(q){
+            filter.$or = [
+                {
+                    title:{
+                        $regex:q,
+                        $options:"i"
+                    }
+                },
+                {
+                    description:{
+                        $regex:q,
+                        $options:"i"
+                    }
+                },
+                {
+                    tags:{
+                        $regex:q,
+                        $options:"i"
+                    }
+                }
+            ];
+        }
+
+        // filter by tags
+        if(tag){
+            filter.tags = tag;
+        }
+
+        if(source){
+            filter.source = source;
+        }
+
+        if(favorite !== undefined){
+            filter.isFavorite = favorite === "true";
+        }
+
+        if(archived !== undefined){
+            filter.isArchived = archived === "true";
+        }else{
+            filter.isArchived = false;
+        }
+
+        // pagination
+        const pageNumber = Math.max(Number(page),1);
+        const limitNumber = Math.min(Math.max(Number(limit),1),100);
+        const skip = (pageNumber - 1) * limitNumber;
+
+        // sorting
+        let sortOptions = {};
+        if(sort==="oldest"){
+            sortOptions={
+                createdAt:1
+            }
+        }else{
+            sortOptions={
+                createdAt:-1
+            }
+        }
+
+        const [memories,total] = await Promise.all([
+            Memory.find(filter)
+            .sort(sortOptions)
+            .skip(skip)
+            .limit(limitNumber),
+            Memory.countDocuments(filter)
+        ]);
+
+        const totalPages = Math.ceil(total/limitNumber);
+
+        res.status(200).json({
+            memories,
+            pagination:{
+                total,
+                page:pageNumber,
+                limit:limitNumber,
+                totalPages,
+                hasNextPage:pageNumber < totalPages,
+                hasPreviousPage: pageNumber > 1
+            }
+        });
+    } catch (error) {
+        console.error("Error in quering the memories :",error);
+        res.status(500).json({
+            message:"Internal server error"
+        })
+    }
+}
