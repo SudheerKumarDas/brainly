@@ -35,7 +35,7 @@ export const createMemory = async (req,res) => {
     }
 }
 
-export const getAllContents = async(req,res) => {
+export const getAllMemories = async(req,res) => {
     try {
         const userId = req.userId;
         const memories = await Memory.find({userId,isDeleted:false}).sort({createdAt:-1});
@@ -57,7 +57,7 @@ export const getAllContents = async(req,res) => {
     }
 }
 
-export const getAContent = async(req,res) => {
+export const getMemory = async(req,res) => {
     try {
         const userId = req.userId;
         const memoryId = req.params.id;
@@ -84,7 +84,7 @@ export const getAContent = async(req,res) => {
     }
 }
 
-export const deleteAContent = async(req,res) => {
+export const deleteMemory = async(req,res) => {
     try {
         const userId = req.userId;
         const memoryId = req.params.id;
@@ -115,7 +115,7 @@ export const deleteAContent = async(req,res) => {
     }
 }
 
-export const updateContent = async(req,res) => {
+export const updateMemory = async(req,res) => {
     try {
         const userId = req.userId;
         const memoryId = req.params.id;
@@ -142,3 +142,26 @@ export const updateContent = async(req,res) => {
     }
 }
 
+export const toogleFavorite = async(req,res) => {
+    try {
+        const userId = req.userId;
+        const memoryId = req.params.id;
+        const memory = await Memory.findOne({userId:userId,_id:memoryId,isDeleted:false});
+        if(!memory){
+            return res.status(404).json({
+                message:"Memory not found"
+            })
+        }
+        memory.isFavorite =! memory.isFavorite;
+        await memory.save();
+        res.status(200).json({
+            message:memory.isFavorite ? "Memory Favorited" : "Memory unfavorited",
+            memory:memory
+        })
+    } catch (error) {
+        console.error("Error in toggling favorite memory");
+        res.status(500).json({
+            message:"Internal server error"
+        })
+    }
+}
