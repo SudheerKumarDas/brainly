@@ -1,13 +1,14 @@
 import express from "express";
 
 import authMiddleware from "../middlewares/user.middlewares.js";
-import { createMemory, deleteMemory, getMemory, getAllMemories, updateMemory, toogleFavorite, toogleArchived, restoreMemory, deleteMemoryPermanently, getDeletedMemories } from "../controllers/memory.controllers.js";
+import { createMemory, deleteMemory, getMemory, getAllMemories, updateMemory, toogleFavorite, toogleArchived, restoreMemory, deleteMemoryPermanently, getDeletedMemories, queryMemories } from "../controllers/memory.controllers.js";
 
 const router = express();
 
 router.post("/",authMiddleware,createMemory);
 router.get("/",authMiddleware,getAllMemories);
 router.get("/trash",authMiddleware,getDeletedMemories);
+router.get("/query",authMiddleware,queryMemories);
 router.get("/:id",authMiddleware,getMemory);
 router.patch("/:id",authMiddleware,updateMemory);
 router.delete("/:id",authMiddleware,deleteMemory);
